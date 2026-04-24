@@ -1,6 +1,18 @@
-## Summary
+# Summary
 
 * [Introdução](README.md)
+
+## Processo Agent-First
+
+* [Projeto reThink Kognit](Kognit_reThink_Gi_v3.md)
+  * [Sobre Este Documento](Kognit_reThink_Gi_v3.md#sobre-este-documento)
+  * [Fase 1 — Now: Processo Agent-First Completo](Kognit_reThink_Gi_v3.md#fase-1--now-processo-agent-first-completo)
+  * [Grupo 1 — Papéis](Kognit_reThink_Gi_v3.md#grupo-1--papéis)
+  * [Grupo 2 — Fundação Técnica](Kognit_reThink_Gi_v3.md#grupo-2--fundação-técnica)
+  * [Grupo 3 — Fluxo de Produto](Kognit_reThink_Gi_v3.md#grupo-3--fluxo-de-produto)
+  * [Grupo 3.1 — Fluxo de Mudança](Kognit_reThink_Gi_v3.md#grupo-31--fluxo-de-mudança)
+  * [Grupo 4 — Fluxo Técnico](Kognit_reThink_Gi_v3.md#grupo-4--fluxo-técnico)
+  * [Grupo 5 — Infraestrutura](Kognit_reThink_Gi_v3.md#grupo-5--infraestrutura)
 
 ## Processo de Test Cases
 
@@ -24,6 +36,18 @@
   * [Checklist de Insights (Pré-TC)](Guia_TestCases_QA.md#6-checklist-de-insights-pré-tc)
   * [Como o Claude Gera os TCs](Guia_TestCases_QA.md#7-como-o-claude-gera-os-tcs--referência-completa)
   * [Estratégia de Regressão por Camadas](Guia_TestCases_QA.md#8-estratégia-de-regressão-por-camadas)
+
+## Automação e Agentes
+
+* [TC Agent — Arquitetura e Pré-Requisitos](TC_Agent_Arquitetura.md)
+  * [Visão Geral](TC_Agent_Arquitetura.md#visão-geral)
+  * [Pré-Requisitos](TC_Agent_Arquitetura.md#pré-requisitos)
+  * [Estrutura de Pastas no OneDrive](TC_Agent_Arquitetura.md#2-estrutura-de-pastas-no-onedrive)
+  * [Arquivo contexto-projeto.md](TC_Agent_Arquitetura.md#3-arquivo-contexto-projetomd)
+  * [Fluxo de Autenticação](TC_Agent_Arquitetura.md#fluxo-de-autenticação-experiência-do-po)
+  * [Fluxo Completo do TC Agent](TC_Agent_Arquitetura.md#fluxo-completo-do-tc-agent)
+  * [Tratamento de Lacunas — CRP](TC_Agent_Arquitetura.md#tratamento-de-lacunas--crp)
+  * [Roadmap de Evolução](TC_Agent_Arquitetura.md#roadmap-de-evolução)
 
 ## Setup e Configuração
 
