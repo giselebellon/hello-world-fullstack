@@ -181,14 +181,19 @@ O **System Prompt** é o conjunto de instruções que transforma o Claude em esp
 3. Escreva uma mensagem simples, por exemplo:
 
 ```
-Seguem as especificações para criação dos Test Cases do módulo Clientes.
+Utilize o conteúdo do arquivo "Prompt-geracao-test-cases-v11.md" como instruções para gerar os test cases do módulo de "Clientes". 
+Inicie a sequencia do "Registry" em 1, não temos TCs definidos ainda. 
+Os arquivos gerados de output devem ter a nomenclatura:
+a) TestCase_{module_code}_{module_name}_%Y%m%d_%H%M%S
+b) Registry_{module_code}_{module_name}_%Y%m%d_%H%M%S
 Siga o processo completo do prompt.
 ```
 
 4. Responda as perguntas de esclarecimento (detalhadas no *Guia de Test Cases QA*)
 5. Receba e salve os arquivos gerados:
-   - **`TestCases_{MOD}.json`** — o roteiro completo de testes
-   - **`TCRegistry_{MOD}.json`** — o registro desta geração para mesclar no global
+   - **`TestCase_{module_code}_{module_name}_{%Y%m%d_%H%M%S}.json`** — o roteiro completo de testes
+   - **`Registry_{module_code}_{module_name}_{%Y%m%d_%H%M%S}.json`** — o registro desta geração para mesclar no global
+6. Se for o primeiro TC o arquivo Registry gerado deverá ser o **`TCRegistry_Global.json`** para manter o mapping completo (veja item 5 para manutenção).
 
 ### 4.3 Modo B — Atualização de módulo existente
 
@@ -197,7 +202,7 @@ Ativado quando a spec de um módulo já existente muda. O Claude identifica o Mo
 **O que você precisa ter em mãos:**
 
 - ✅ O arquivo `.md` da spec **atualizada**
-- ✅ O **`TestCases_{MOD}.json` atual** do módulo ← obrigatório para o Modo B
+- ✅ O **`TestCase_{module_code}_{module_name}_{%Y%m%d_%H%M%S}.json` atual** do módulo ← obrigatório para o Modo B
 - ✅ O **`TCRegistry_Global.json`** atualizado
 
 **Passo a passo:**
@@ -211,11 +216,9 @@ Ativado quando a spec de um módulo já existente muda. O Claude identifica o Mo
 4. O Claude apresentará um **relatório de impacto identificado** antes de fazer perguntas — confirme ou corrija o mapeamento proposto
 5. Responda as demais perguntas de esclarecimento
 6. Receba e salve os arquivos gerados:
-   - **`TestCases_{MOD}_v{N}.json`** — JSON completo e versionado do módulo
-   - **`TCRegistry_{MOD}_delta.json`** — somente os TCs novos desta atualização
+   - **`TestCase_{module_code}_{module_name}_{%Y%m%d_%H%M%S}.json`** — JSON completo e versionado do módulo
+   - **`Registry_{module_code}_{module_name}_{%Y%m%d_%H%M%S}.json`** — somente os TCs novos desta atualização
    - **Relatório de Atualização** — copie e arquive junto com os JSONs
-
-> 💡 **Versionamento dos JSONs:** salve o JSON anterior como `TestCases_{MOD}_v{N-1}.json` antes de substituir. Isso mantém o histórico completo de cada ciclo.
 
 > ⚠️ **TCs obsoletos no Excel:** após converter, localize as linhas dos TCs marcados como obsoletos e pinte o cabeçalho em cinza para sinalização visual — o script não faz isso automaticamente.
 
@@ -272,7 +275,7 @@ O **TC Registry Global** é o arquivo central que mantém o histórico de todos 
 **Modo A (geração inicial):**
 
 1. Abra o `TCRegistry_Global.json` no VS Code ou qualquer editor de texto
-2. Abra o `TCRegistry_{MODULE_CODE}.json` gerado pelo Claude
+2. Abra o `Registry_{module_code}_{module_name}_{%Y%m%d_%H%M%S}.json` gerado pelo Claude
 3. **Copie** todas as entradas do array `entries` do arquivo do módulo
 4. **Cole** no final do array `entries` do arquivo global
 5. Atualize `last_global_id`, `last_tc_name` e incremente `version`

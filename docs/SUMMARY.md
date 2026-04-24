@@ -15,8 +15,6 @@
   * [Alterando e Mantendo TCs](Manual_Processo_QA.md#8-alterando-e-mantendo-test-cases)
   * [Solução de Problemas](Manual_Processo_QA.md#9-solução-de-problemas-comuns)
 
-## Referência Técnica
-
 * [Guia de Test Cases QA](Guia_TestCases_QA.md)
   * [Objetivo dos Test Cases](Guia_TestCases_QA.md#1-objetivo-dos-test-cases)
   * [Ciclo de Testes por Sprint](Guia_TestCases_QA.md#2-ciclo-de-testes-por-sprint)
