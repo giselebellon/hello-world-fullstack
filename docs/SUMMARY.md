@@ -34,3 +34,9 @@
   * [Configurando o Script](Guia_Instalacao_Python.md#4-configurando-o-script-de-conversão)
   * [Solução de Problemas](Guia_Instalacao_Python.md#5-solução-de-problemas-comuns)
 
+* [Setup Completo — Hello World Full Stack](setup-completo-projeto.md)
+  * [Ferramentas Necessárias](setup-completo-projeto.md#o-que-você-precisa-instalar-antes-de-começar)
+  * [Backend em C# .NET Core](setup-completo-projeto.md#parte-1--backend-em-c-net-core)
+  * [Frontend em React](setup-completo-projeto.md#parte-2--frontend-em-react)
+  * [Git e GitHub](setup-completo-projeto.md#parte-3--git-e-github)
+  * [Documentação com GitBook](setup-completo-projeto.md#parte-4--documentação-com-gitbook)
