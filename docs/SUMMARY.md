@@ -37,18 +37,6 @@
   * [Como o Claude Gera os TCs](Guia_TestCases_QA.md#7-como-o-claude-gera-os-tcs--referência-completa)
   * [Estratégia de Regressão por Camadas](Guia_TestCases_QA.md#8-estratégia-de-regressão-por-camadas)
 
-## Automação e Agentes
-
-* [TC Agent — Arquitetura e Pré-Requisitos](TC_Agent_Arquitetura.md)
-  * [Visão Geral](TC_Agent_Arquitetura.md#visão-geral)
-  * [Pré-Requisitos](TC_Agent_Arquitetura.md#pré-requisitos)
-  * [Estrutura de Pastas no OneDrive](TC_Agent_Arquitetura.md#2-estrutura-de-pastas-no-onedrive)
-  * [Arquivo contexto-projeto.md](TC_Agent_Arquitetura.md#3-arquivo-contexto-projetomd)
-  * [Fluxo de Autenticação](TC_Agent_Arquitetura.md#fluxo-de-autenticação-experiência-do-po)
-  * [Fluxo Completo do TC Agent](TC_Agent_Arquitetura.md#fluxo-completo-do-tc-agent)
-  * [Tratamento de Lacunas — CRP](TC_Agent_Arquitetura.md#tratamento-de-lacunas--crp)
-  * [Roadmap de Evolução](TC_Agent_Arquitetura.md#roadmap-de-evolução)
-
 ## Setup e Configuração
 
 * [Guia de Instalação Python](Guia_Instalacao_Python.md)
