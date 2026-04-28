@@ -38,7 +38,7 @@ O campo `verificabilidade` responde diretamente à pergunta "o que automatizar e
 |---|---|---|---|
 | `automática-unit` | Unit test — lógica pura, sem I/O (xUnit / Vitest) | Backend ou Frontend Coder (loop interno) | < 1 min |
 | `automática-api` | API integration via WebApplicationFactory — app .NET Core inteiro em memória, HTTP real, sem browser | Backend Coder (loop interno) | < 3 min |
-| `automática-componente` | React component test (RTL + msw) — componente isolado com API mockada, sem browser | Frontend Coder (loop interno) | < 2 min |
+| `automática-componente` | React component test (RTL + msw) — **apenas para comportamentos interativos**: validações de form, estados de loading, rendering condicional, mensagens de erro; componentes puramente presentacionais ficam em `revisão humana` | Frontend Coder (loop interno) | < 2 min |
 | `e2e-smoke` | Jornada crítica via browser real — apenas o que não pode ser verificado nas camadas anteriores | CI/CD (Cypress / Playwright) | < 5 min total |
 | `revisão humana` | Requer julgamento — UX, acessibilidade, decisão de negócio | Product Engineer (Gate D) | — |
 | `não funcional` | Performance, segurança, escalabilidade | CI/CD ou ferramenta específica | — |
@@ -90,16 +90,19 @@ O `WebApplicationFactory` é a ferramenta-chave: sobe o app ASP.NET Core inteiro
 Implementa componentes React/TypeScript
   → escreve unit tests (Vitest)               → critérios "automática-unit"
   → escreve component tests                   → critérios "automática-componente"
-    (React Testing Library + msw —
-     componente isolado, API mockada,
-     sem browser)
+    (React Testing Library + msw)               APENAS para comportamentos interativos:
+                                                validações de form, estados de loading,
+                                                rendering condicional, mensagens de erro
+                                                NÃO para componentes puramente
+                                                presentacionais (tabelas somente-leitura,
+                                                cards, dashboards de visualização)
   → executa ambas as suítes
     → passam? → abre PR com evidência
     → falham? → corrige → executa de novo
     → após N iterações sem resolução → CRP ao PE
 ```
 
-O msw (Mock Service Worker) intercepta chamadas HTTP do React em nível de rede — o componente de formulário acredita que está se comunicando com uma API real, mas é o msw que responde com dados controlados. Isso permite verificar comportamentos como *"campos obrigatórios vazios → mensagem de erro aparece"* sem subir nenhum servidor.
+O msw (Mock Service Worker) intercepta chamadas HTTP do React em nível de rede — o componente de formulário acredita que está se comunicando com uma API real, mas é o msw que responde com dados controlados. Isso permite verificar comportamentos como *"campos obrigatórios vazios → mensagem de erro aparece"* sem subir nenhum servidor. Componentes puramente presentacionais — tabelas somente-leitura, cards, dashboards de visualização — não recebem testes RTL; sua cobertura funcional já está garantida pelo WebApplicationFactory no backend, e a qualidade visual é verificada pelo UX Reviewer Agent ou pelo PS.
 
 O Agyn documenta esse padrão como mecanismo central de qualidade: *"when the initial test state is clean and failures correspond directly to the reported issue, this approach provides a reliable feedback signal that guides incremental fixes and helps prevent regressions."* O teste é o sinal de feedback que orienta o agente — não uma verificação posterior ao trabalho.
 
@@ -145,7 +148,7 @@ No processo atual, esse conhecimento vive nos Test Cases. No processo Agent-Firs
 
 **No Acceptance Contract** — os cenários negativos, edge cases e critérios de aceite são agora os critérios do contrato, com `verificabilidade` explícita e precisa. O agente usa a ferramenta certa para cada tipo: WebApplicationFactory para validar regras de negócio, RTL para verificar comportamento de componente, Cypress apenas para a jornada crítica de browser.
 
-**No `CLAUDE.md` do projeto** — as regras de o que não automatizar (fluxos de convite, uploads de imagem, verificações puramente visuais), a convenção de `data-testid`, a estratégia de dados com âncoras e a definição de quais jornadas merecem `e2e-smoke`. Essas regras tornam-se `MentorScript` — *"team-specific best practices, architectural principles, and coding styles codified, versioned, and applied consistently"* (SASE, Hassan et al., 2025).
+**No `CLAUDE.md` do projeto** — as regras de o que não automatizar (fluxos de convite, uploads de imagem, verificações puramente visuais), a convenção de `data-testid`, a estratégia de dados com âncoras, a definição de quais jornadas merecem `e2e-smoke`, e a **regra de RTL**: escrever testes de componente apenas para comportamentos interativos — nunca para componentes puramente presentacionais, cuja cobertura já está garantida via WebApplicationFactory ou é responsabilidade do UX Reviewer Agent. Essas regras tornam-se `MentorScript` — *"team-specific best practices, architectural principles, and coding styles codified, versioned, and applied consistently"* (SASE, Hassan et al., 2025).
 
 **Na estratégia de cobertura por feature** — a classificação de quais critérios são `e2e-smoke` versus `automática-api` versus `automática-componente` é derivada da criticidade e da natureza técnica de cada comportamento. Documentada no `feature-map.yaml` por feature, não por TC individual.
 

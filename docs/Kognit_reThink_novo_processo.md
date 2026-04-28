@@ -336,12 +336,13 @@ flowchart LR
   - Analyst Agent [Opus] — gera Feature Spec ou spec-delta
   - Reviewer Agent [Sonnet] — verifica consistência
 - Coder Agent [Sonnet] — gera protótipo React
-- UX Reviewer Agent [Sonnet] — verifica conformidade técnica e usabilidade
-- Functional Reviewer Agent [Sonnet] — verifica cobertura funcional
+- UX Reviewer Agent [Sonnet] — renderiza o protótipo no browser (via Playwright MCP ou equivalente), captura screenshots, avalia conformidade visual com a identidade do cliente, verifica responsividade e fluxo de navegação; gera feedback estruturado para o Coder Agent corrigir antes de o PS apresentar ao cliente
+- Functional Reviewer Agent [Sonnet] — compara o protótipo renderizado contra a Feature Spec, verificando cobertura funcional critério a critério
 
 **Outputs:**
 - `spec-[feature]-v1.md` por Feature (ou `spec-delta-[issue].md` para mudanças)
-- Protótipo navegável (branch `proto/[feature]-[cliente]`)
+- Protótipo navegável (branch `proto/[feature]-[cliente]`) — revisado pelo UX Reviewer Agent antes de chegar ao PS
+- Screenshots de avaliação gerados pelo UX Reviewer Agent (commitados em `work/[issue]-[slug]/ux-review/`)
 - `[processo]-to-be-v1.bpmn` atualizado quando aplicável
 - `FeatureRegistry_{MODULE_CODE}.json` para incorporação ao `feature-map.yaml`
 
@@ -350,13 +351,15 @@ flowchart LR
     IN[/"Epics aprovados\nou Business Need direto"/]
     AA2["Analyst Agent"]
     RV2["Reviewer Agent"]
-    CA["Coder Agent\nprotótipo"]
-    UX["UX Reviewer"]
-    FR["Functional Reviewer"]
+    CA["Coder Agent\nprotótipo React"]
+    UX["UX Reviewer Agent\nbrowser + screenshot"]
+    FR["Functional Reviewer\nspec vs. protótipo"]
     PS2[/"Product Strategist\nrevisa + apresenta"/]
     OUT[/"Feature Spec\nspec-delta\nprotótipo navegável"/]
 
-    IN --> AA2 --> RV2 --> CA --> UX & FR --> PS2 --> OUT
+    IN --> AA2 --> RV2 --> CA --> UX --> FR
+    UX -.->|"feedback visual"| CA
+    FR --> PS2 --> OUT
 ```
 
 `→ v3: migrar detalhes de 1.5 (Geração de Feature Spec), 1.5.M (Delta Spec), 1.6 (Prototipação), 1.6.M (Delta Protótipo)`
@@ -498,7 +501,7 @@ Responsável:     Coding Agent | Code Reviewer | Product Engineer
 
 **Papéis agênticos:**
 - Backend Coder [Sonnet] — implementa Issues de backend (.NET/C#); gera migrations EF Core / FluentMigrator; escreve e executa no loop interno: **unit tests** (xUnit — lógica pura) e **API integration tests** (WebApplicationFactory — app em memória, HTTP real, sem browser); aplica migrations localmente; loop de correção antes de abrir PR
-- Frontend Coder [Sonnet] — implementa Issues de frontend (React/TypeScript); escreve e executa no loop interno: **unit tests** (Vitest — lógica pura) e **component tests** (React Testing Library + msw — componente com API mockada, sem browser); loop de correção antes de abrir PR
+- Frontend Coder [Sonnet] — implementa Issues de frontend (React/TypeScript); escreve e executa no loop interno: **unit tests** (Vitest — lógica pura) e **component tests** (React Testing Library + msw) **apenas para critérios `automática-componente`** — comportamentos interativos verificáveis sem browser (validações de form, estados de UI, rendering condicional); componentes puramente presentacionais não recebem testes RTL; loop de correção antes de abrir PR
 - Paralelo quando não há dependência técnica; sequencial quando o Frontend depende de contrato de API estabilizado pelo Backend
 
 **Loop interno do Coding Agent — o coração da verificação:**
@@ -529,6 +532,12 @@ implementa componentes React/TypeScript
 escreve testes para critérios com verificabilidade:
   "automática-unit"        → Vitest, lógica pura
   "automática-componente"  → React Testing Library + msw (API mockada)
+                             SOMENTE para comportamentos interativos:
+                             validações de form, estados de UI,
+                             rendering condicional, mensagens de erro
+                             NÃO escrever para componentes puramente
+                             presentacionais (tabelas somente-leitura,
+                             cards, dashboards de visualização)
         ↓
 executa — todos passaram?
   sim → abre PR com evidência
@@ -835,8 +844,8 @@ Em vez de mapear ferramentas específicas, o processo define **capacidades neces
 | Research Agent | Busca na internet · leitura/escrita de arquivos |
 | Analyst Agent | Leitura de arquivos do repositório · escrita de artefatos · leitura do `feature-map.yaml` |
 | Reviewer Agent | Leitura de output do agente anterior · escrita de feedback estruturado |
-| UX Reviewer Agent | Leitura de arquivos · renderização de protótipo (browser) |
-| Functional Reviewer Agent | Leitura de arquivos · comparação entre spec e protótipo |
+| UX Reviewer Agent | Automação de browser (Playwright MCP ou equivalente) · captura de screenshot · leitura de arquivos de identidade visual · escrita de feedback estruturado |
+| Functional Reviewer Agent | Automação de browser · leitura de arquivos · comparação entre spec e protótipo renderizado |
 | Architecture Agent | Leitura do repositório · escrita de artefatos · geração de diagramas |
 | Spec Writer Agent | Leitura de arquivos · escrita em formato OpenAPI |
 | Decompositor Agent | Leitura de artefatos · escrita de Issues via API do GitHub |
@@ -943,7 +952,7 @@ Arquivos que vivem no repositório do cliente e definem regras específicas daqu
 
 | Arquivo | Propósito | Quem mantém |
 |---|---|---|
-| `CLAUDE.md` | MentorScript — padrões de arquitetura, stack, regras de negócio, guardrails por agente, políticas operacionais, referência à versão dos skills em uso; inclui obrigatoriamente regras de migration: convenção de nomenclatura, limite de iterações do loop interno, critérios para marcar `[Destructive]`, política de seed data idempotente | PE |
+| `CLAUDE.md` | MentorScript — padrões de arquitetura, stack, regras de negócio, guardrails por agente, políticas operacionais, referência à versão dos skills em uso; inclui obrigatoriamente: regras de migration (convenção de nomenclatura, critérios para `[Destructive]`, seed data idempotente), limite de iterações do loop interno, regra de RTL (escrever apenas para critérios `automática-componente` — comportamentos interativos; nunca para componentes puramente presentacionais) | PE |
 | `.cursorrules` | Padrões front-end para os Coder Agents: convenções React/TypeScript, estrutura de componentes, padrões de estado | PE |
 | `.coderabbit.yaml` | Regras de review automático: critérios de qualidade, checklist de segurança, padrões de PR | PE |
 | `.kognit/agents/agents.md` | Registro da versão dos skills em uso no projeto | PE |
@@ -1023,7 +1032,7 @@ Todo trabalho do projeto vive em um único GitHub Project com as seguintes confi
 | **Seed Data** | Inserts de dados de configuração ou regras de negócio incluídos nas migrations (tipos, traduções, dados básicos como países, estados, tipos de usuário, rotas); sempre idempotentes — verificam existência antes de inserir; não são re-executados pois o log de execução fica registrado no banco |
 | **Migration Destrutiva** | Migration que remove ou altera incompativelmente dados existentes (DROP COLUMN, DROP TABLE, ALTER COLUMN com mudança de tipo); marcada com `[Destructive]` na classe FluentMigrator; roda automaticamente em dev_qa mas requer gate explícito do PE antes de ser aplicada em hom_prod |
 | **WebApplicationFactory** | Classe nativa do ASP.NET Core que sobe o app inteiro em memória para testes de integração via HTTP real — sem browser, sem servidor externo; é o executor dos critérios `automática-api` no loop interno do Backend Coder |
-| **React Testing Library (RTL)** | Biblioteca de testes de componente React que testa comportamento de UI sem browser; combinada com msw (Mock Service Worker) para mockar chamadas de API; é o executor dos critérios `automática-componente` no loop interno do Frontend Coder |
+| **React Testing Library (RTL)** | Biblioteca de testes de componente React que testa comportamento de UI sem browser; combinada com msw para mockar chamadas de API; usada **apenas para critérios `automática-componente`** — comportamentos interativos (validações de form, estados de loading, rendering condicional, mensagens de erro); componentes puramente presentacionais (tabelas somente-leitura, cards, dashboards) não recebem testes RTL — sua cobertura é `revisão humana` ou já está garantida via WebApplicationFactory no backend |
 | **msw** | Mock Service Worker — intercepta chamadas HTTP do React em nível de rede durante testes; permite testar componentes contra respostas de API mockadas sem subir servidor |
 
 ### A2 — Estrutura de Arquivos {#filesystem}

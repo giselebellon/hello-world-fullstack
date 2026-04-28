@@ -436,3 +436,135 @@ git push
 | Git | Controle de versão local |
 | GitHub | Armazenar o código na nuvem |
 | GitBook | Documentar o projeto de forma organizada |
+
+---
+
+## Parte 5 — Integração GitHub com Claude (Claude Code Action)
+
+Esta etapa permite usar o Claude diretamente no seu repositório GitHub para:
+
+- Revisar Pull Requests automaticamente
+- Gerar sugestões de código
+- Automatizar análises com IA
+
+---
+
+### 5.1 Pré-requisitos
+
+Antes de começar, você precisa:
+
+- Conta no GitHub
+- Repositório já criado (ex: `hello-world-fullstack`)
+- Conta na Anthropic (Claude)
+
+---
+
+### 5.2 Criar a chave de API do Claude
+
+1. Acesse: https://console.anthropic.com/
+2. Vá em **API Keys**
+3. Clique em **Create Key**
+4. Copie a chave gerada (ex: `sk-ant-...`)
+
+---
+
+### 5.3 Adicionar a chave como segredo no GitHub
+
+1. Acesse seu repositório no GitHub
+2. Vá em:
+
+```text
+Settings → Secrets and variables → Actions
+````
+
+3. Clique em:
+
+```text
+New repository secret
+```
+
+4. Configure:
+
+```text
+Name: ANTHROPIC_API_KEY
+Value: (cole sua chave da Anthropic)
+```
+
+5. Clique em **Add secret**
+
+---
+
+### 5.4 Criar o workflow do GitHub Actions
+
+No seu projeto, crie o arquivo:
+
+```text
+.github/workflows/claude.yml
+```
+
+Conteúdo:
+
+```yaml
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+```
+
+---
+
+### 5.5 Fazer commit da configuração
+
+```bash
+git add .
+git commit -m "Add Claude GitHub Action"
+git push
+```
+
+---
+
+### 5.6 Como funciona
+
+A partir de agora:
+
+1. Sempre que você abrir ou atualizar um Pull Request
+2. O GitHub executa automaticamente o workflow
+3. O Claude analisa o código
+4. Ele pode adicionar comentários ou sugestões no PR
+
+---
+
+### 5.7 Boas práticas (segurança e simplicidade)
+
+* Nunca exponha sua API Key no código
+* Sempre use `secrets` do GitHub
+* Limite o uso inicialmente a Pull Requests (mais seguro)
+* Teste primeiro em um repositório pessoal antes de usar em produção
+
+---
+
+### 5.8 Possíveis evoluções
+
+Depois de validar, você pode evoluir para:
+
+* Revisão automática mais detalhada
+* Geração de testes automatizados
+* Sugestão de melhorias arquiteturais
+* Integração com backlog (Linear, etc.)
+
+---
+
