@@ -4,7 +4,9 @@
 
 ## Processo Agent-First
 
-* [Projeto reThink Kognit](Kognit_reThink_Gi_v3.md)
+* [Projeto reThink Kognit](Kognit_reThink_novo_processo.md)
+
+* [Sobre o processo de Testes](Qualidade_Testes_Processo_Agentico.md)
 
 
 ## Processo de Test Cases
