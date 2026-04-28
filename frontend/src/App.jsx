@@ -4,6 +4,7 @@ function App() {
   const [message, setMessage] = useState("");
   const [nome, setNome] = useState("");
   const [saudacao, setSaudacao] = useState("");
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
     fetch("https://localhost:7162/api/hello")
@@ -16,9 +17,13 @@ function App() {
   }, []);
 
   function handleEnviar() {
-    if (nome.trim()) {
-      setSaudacao(`Olá ${nome}!`);
+    if (!nome.trim()) {
+      setErro("Por favor, preencha o seu nome.");
+      setSaudacao("");
+      return;
     }
+    setErro("");
+    setSaudacao(`Olá ${nome}!`);
   }
 
   return (
@@ -34,6 +39,7 @@ function App() {
         />
         <button onClick={handleEnviar}>Enviar</button>
       </div>
+      {erro && <p style={{ color: "red" }}>{erro}</p>}
       {saudacao && <p>{saudacao}</p>}
     </div>
   );
