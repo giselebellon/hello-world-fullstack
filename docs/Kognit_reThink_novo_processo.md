@@ -739,10 +739,6 @@ Quando o PR contém migration marcada com `[Destructive]`, o pipeline bloqueia o
 | Duas demandas afetando mesmo componente | Conflito | CRP formal antes de prosseguir |
 | Demanda sem impacto funcional (bug, cosmético) | Classe A | Issue tipo Bug direto — sem Business Need |
 
-**Implementação no Now:**
-
-O Assistente (S1) é acessível via interface web (assistant-ui) no MVP. A integração com Teams via Azure Bot Service é Fase 2 — quando o time adotar o canal como padrão de comunicação. O orquestrador LangGraph recebe as mensagens via API REST, independente do canal de entrada.
-
 ---
 
 ## S2 — Gestão de Backlog e Priorização {#backlog}
@@ -883,8 +879,6 @@ Em vez de mapear ferramentas específicas, o processo define **capacidades neces
 
 > **Nota de implementação:** diferentes orquestradores proveem essas capacidades de formas distintas. Claude Code provê leitura/escrita de repositório e execução de terminal nativamente. Um agente com acesso a MCP servers pode prover GitHub API. Browser automation pode ser Playwright, Puppeteer ou Computer Use. A escolha do orquestrador não altera os skills nem o processo — apenas a forma como as capacidades são satisfeitas.
 
-> **Orquestrador:** LangGraph (Python, MIT) — escolha confirmada para o MVP. Agnóstico de modelo via LangChain integrations. Checkpointing com PostgreSQL. Observabilidade via LangSmith (MVP) / Langfuse self-hosted (Fase 2). Ver documento *Orquestrador_Analise_reThink.md* para fundamentação.
-
 ---
 
 ### Camada 1 — Skills de Agente {#skills}
@@ -999,20 +993,6 @@ Todo trabalho do projeto vive em um único GitHub Project com as seguintes confi
 - **Roadmap** — agrupado por Fase, ordenado por Prioridade, Tipo = Epic
 - **Backlog** — Tipo = Backlog Item / Bug / Task, ordenado por Sprint + Prioridade
 - **Board** — Kanban por status (Backlog · Em andamento · Review · Done)
-
----
-
-### Interface de Dispatch
-
-O Assistente de Contexto Permanente (S1) é acessível via interface web durante o MVP. A integração com canais de comunicação corporativos (Teams, Slack) é Fase 2.
-
-| Modo | Implementação MVP | Fase 2 |
-|---|---|---|
-| Interface de conversa | assistant-ui (React · web) | Teams Bot via Azure Bot Service |
-| Gates humanos | Streamlit (interface visual de aprovação) | Notificação no canal do time |
-| Monitoramento | LangGraph Studio (dev) / LangSmith (produção) | Dashboard integrado |
-
-**Agnósticidade:** a interface é desacoplada do orquestrador via REST API e WebSocket. Trocar de assistant-ui para Teams Bot não altera o grafo LangGraph nem os skill files.
 
 ---
 
