@@ -1109,37 +1109,85 @@ O processo define **quatro ambientes** com segregação estrita. Nenhum agente t
 
 ```
 [projeto]/
+│
 ├── .kognit/
 │   ├── agents/
-│   │   └── agents.md          # versão dos skills em uso neste projeto
-│   └── templates/             # cópia dos templates Spec Kit customizados Kognit
-├── work/
-│   └── [issue]-[slug]/        # artefatos em construção — gerados pelos agentes
-│       ├── business-need.md
-│       ├── spec-[feature]-v1.md
-│       ├── design.md
-│       ├── acceptance-contract-[issue].md
-│       ├── mrp.md
-│       ├── crp.md (quando emitido)
-│       └── ux-review/         # screenshots do UX Reviewer Agent
-├── docs/
-│   └── [issue]-[slug]/        # artefatos promovidos após merge pelo Release Agent
-├── specs/
-│   └── [###-feature]/         # estrutura Spec Kit — gerada pelos slash commands
-│       ├── spec.md
-│       ├── plan.md
-│       ├── data-model.md
-│       └── tasks.md
-├── src/                       # código-fonte do produto
-├── Migrations/                # EF Core ou FluentMigrator
-├── CLAUDE.md                  # MentorScript — regras do projeto para os agentes
-├── .coderabbit.yaml           # regras de code review automático
-├── .cursorrules               # padrões front-end para Coding Agents
-├── constitution.md            # Spec Kit — princípios não-negociáveis do projeto
-└── feature-map.yaml           # índice de Epics e Features — atualizado pelo Release Agent
+│   │   └── agents.md              # registro de versão dos skills em uso
+│   │                              # formato: skill | versão | data adoção | responsável
+│   └── templates/                 # templates Spec Kit customizados Kognit
+│       ├── spec-template.md       # base para /speckit.specify → Feature Spec
+│       ├── plan-template.md       # base para /speckit.plan → design.md
+│       └── tasks-template.md      # base para /speckit.tasks → Acceptance Contracts
+│
+├── work/                          # artefatos EM CONSTRUÇÃO — gerados pelos agentes
+│   └── [issue]-[slug]/            # uma pasta por Issue
+│       ├── business-need.md       # P2 — Assistente gera, PS valida
+│       ├── roadmap-draft.md       # P3.1 — Analyst Agent, bullets de Epics
+│       ├── spec-[feature]-v1.md   # P3.2 — Feature nova (spec completa)
+│       ├── spec-delta-[issue].md  # P3.2 — Mudança em feature existente
+│       ├── design.md              # P4 — Architecture Agent
+│       │                          #   inclui: arquitetura, banco, RNFs, impacto
+│       ├── openapi-draft.yaml     # P4 — Spec Writer (condicional — nova API)
+│       ├── acceptance-contract-[issue].md  # P4 — Decompositor Agent
+│       │                          #   inclui: critérios com campo verificabilidade
+│       ├── mrp.md                 # P6 — Code Reviewer Agent
+│       ├── crp.md                 # qualquer fase — quando agente emite CRP
+│       └── ux-review/             # P3.2 — UX Reviewer Agent
+│           └── [screenshot].png   # capturas do protótipo renderizado
+│
+├── docs/                          # artefatos PROMOVIDOS — após merge aprovado (Gate D)
+│   └── [epic-slug]/               # organizado por Epic
+│       └── [feature-slug]/        # organizado por Feature
+│           ├── spec-[feature]-v[N].md     # versão atual da spec (Release Agent atualiza)
+│           ├── openapi.yaml               # API publicada (promovida do draft)
+│           └── acceptance-contracts/
+│               └── [issue]-ac.md          # contratos por Issue entregue
+│
+├── specs/                         # estrutura Spec Kit — gerada pelos slash commands
+│   └── [###-feature]/             # numeração automática pelo Spec Kit
+│       ├── spec.md                # /speckit.specify — objetivos funcionais + US
+│       ├── plan.md                # /speckit.plan — design técnico
+│       ├── data-model.md          # /speckit.plan — modelo de dados
+│       └── tasks.md               # /speckit.tasks — Acceptance Contracts
+│
+├── src/                           # código-fonte do produto
+│   ├── backend/                   # .NET Core — C#
+│   └── frontend/                  # React — TypeScript
+│
+├── Migrations/                    # EF Core ou FluentMigrator
+│   └── [timestamp]_[description].cs   # migrations versionadas; [Destructive] quando aplicável
+│
+├── CHANGELOG.md                   # atualizado pelo Release Agent a cada entrega
+├── CLAUDE.md                      # MentorScript — regras do projeto para os agentes
+│                                  #   inclui: stack, convenções, política de modelos,
+│                                  #   limites de iteração, regra RTL, critérios [Destructive]
+├── constitution.md                # Spec Kit — princípios não-negociáveis (base do CLAUDE.md)
+├── .coderabbit.yaml               # regras de code review automático — configurado pelo PE
+├── .cursorrules                   # padrões front-end para Coding Agents
+└── feature-map.yaml               # índice de Epics e Features — fonte de verdade do produto
+                                   # atualizado pelo Release Agent após cada entrega
 ```
 
-**Regra de promoção:** artefatos ficam em `work/` durante o desenvolvimento e são promovidos para `docs/` pelo Release Agent após o merge aprovado em Gate D. Nada é deletado — o histórico completo de decisões permanece rastreável.
+**Regras de ciclo de vida dos artefatos:**
+
+| Fase | Artefato | Criado por | Local | Destino após merge |
+|---|---|---|---|---|
+| P2 | `business-need.md` | Assistente (PS valida) | `work/` | Arquivado — referência histórica |
+| P3.1 | `roadmap-draft.md` | Analyst Agent | `work/` | Arquivado |
+| P3.2 | `spec-[feature]-v1.md` | Analyst Agent | `work/` e `specs/` | `docs/[epic]/[feature]/` |
+| P3.2 | `spec-delta-[issue].md` | Analyst Agent | `work/` | Incorporado à spec pelo Release Agent |
+| P3.2 | screenshots UX | UX Reviewer Agent | `work/ux-review/` | Arquivado |
+| P4 | `design.md` | Architecture Agent | `work/` | Arquivado após merge |
+| P4 | `openapi-draft.yaml` | Spec Writer Agent | `work/` | `docs/[epic]/[feature]/openapi.yaml` |
+| P4 | `acceptance-contract-[issue].md` | Decompositor Agent | `work/` | `docs/[epic]/[feature]/acceptance-contracts/` |
+| P6 | `mrp.md` | Code Reviewer Agent | `work/` | Arquivado — auditoria |
+| P6 | `crp.md` | Qualquer agente | `work/` | Arquivado — auditoria |
+| P7 | `CHANGELOG.md` | Release Agent | raiz | Permanente — atualizado incrementalmente |
+| P7 | `feature-map.yaml` | Release Agent | raiz | Permanente — fonte de verdade |
+
+> **Nada é deletado.** O histórico completo de decisões, CRPs e MRPs permanece rastreável no repositório. A promoção de `work/` para `docs/` não remove os originais — apenas torna os artefatos finais acessíveis em estrutura navegável por Epic e Feature.
+
+> **Spec Kit e `work/`:** o Spec Kit gera artefatos em `specs/[###-feature]/`. O Release Agent é responsável por mover o conteúdo final para `docs/` na estrutura por Epic/Feature. Os dois sistemas coexistem — `specs/` é o espaço de geração dos agentes via slash commands; `docs/` é o espaço de consulta de qualquer membro do time.
 
 ### A3 — Progressão de US+AC {#usac}
 

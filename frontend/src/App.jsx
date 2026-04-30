@@ -25,6 +25,7 @@ function App() {
       });
   }, []);
 
+<<<<<<< HEAD
   async function handleEnviar() {
     const erroNome = validarCampo(nome, "nome");
     if (erroNome) { setErro(erroNome); setSaudacao(""); return; }
@@ -50,7 +51,16 @@ function App() {
       }
     } catch {
       setErro("Erro ao conectar com a API.");
+=======
+  function handleEnviar() {
+    if (!nome.trim()) {
+      setErro("Por favor, preencha o seu nome.");
+      setSaudacao("");
+      return;
+>>>>>>> 15f26495b5b22e65ce900c44f3ec38cae4ed07ff
     }
+    setErro("");
+    setSaudacao(`Olá ${nome}!`);
   }
 
   return (
