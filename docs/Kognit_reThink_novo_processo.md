@@ -883,35 +883,6 @@ Em vez de mapear ferramentas específicas, o processo define **capacidades neces
 
 > **Nota de implementação:** diferentes orquestradores proveem essas capacidades de formas distintas. Claude Code provê leitura/escrita de repositório e execução de terminal nativamente. Um agente com acesso a MCP servers pode prover GitHub API. Browser automation pode ser Playwright, Puppeteer ou Computer Use. A escolha do orquestrador não altera os skills nem o processo — apenas a forma como as capacidades são satisfeitas.
 
-#### Status de implementabilidade por fase
-
-| Fase | Implementável sem integração adicional | Dependência principal |
-|---|---|---|
-| P1 | ✅ Sim | Consolidation Agent + Research Agent com acesso a arquivos e web |
-| P2 | ⚠️ Parcialmente | S1 funciona como conversa; integração com canal de comunicação (Teams, Slack, etc.) é separada |
-| P3.1 + P3.2 | ✅ Sim | Pipeline Research → Analyst → Reviewer com acesso a arquivos |
-| P4 | ✅ Sim | Architecture Agent + Decompositor com acesso a repositório e GitHub API |
-| P5 | ✅ Sim | Coding agents com acesso a repositório e terminal |
-| P6 | ✅ Sim | CodeRabbit + CI/CD com Cypress/Playwright para smoke (1–2 testes por módulo) — todo o resto já coberto no loop interno |
-| P7 | ✅ Sim | Release Agent com acesso a repositório e pipeline de deploy |
-| S1 (canal) | ⚠️ Separado | Interface de conversa com o humano — implementação depende do canal escolhido |
-
-**Sequência recomendada para o primeiro ciclo implementado:**
-
-```
-1. Validar P3.2 → P4 → P5 → P6 → P7 com um módulo piloto
-   (núcleo técnico — menor dependência de integração externa)
-
-2. Adicionar P3.1 e o loop completo de produto
-   (BA Agent nas duas passagens + gates)
-
-3. Integrar S1 no canal de comunicação do time
-   (Assistente acessível sem navegar no repositório)
-
-4. Cobrir P1 + P2 com o pipeline de discovery
-   (Consolidation + Legacy + Research para sessões)
-```
-
 > **Orquestrador:** LangGraph (Python, MIT) — escolha confirmada para o MVP. Agnóstico de modelo via LangChain integrations. Checkpointing com PostgreSQL. Observabilidade via LangSmith (MVP) / Langfuse self-hosted (Fase 2). Ver documento *Orquestrador_Analise_reThink.md* para fundamentação.
 
 ---
