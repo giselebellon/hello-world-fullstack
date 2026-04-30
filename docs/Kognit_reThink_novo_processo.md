@@ -1,8 +1,8 @@
 # Kognit — Processo Agent-First
 
-> **Versão:** 0.4 — Esqueleto para validação
+> **Versão:** 1.0 — Processo from scratch
 > **Data:** Abril de 2026
-> **Status:** Em construção — estrutura validada, conteúdo a migrar do v3
+> **Status:** Em construção — documento vivo, evolui com cada Sprint
 
 ---
 
@@ -18,8 +18,6 @@ O processo está organizado em **seis blocos**, leia nesta sequência:
 6. **Apêndice** — glossário, estrutura de arquivos, labels e campos GitHub Projects
 
 **Como referenciar seções:** use os identificadores semânticos (P1, P3.2, GA, S1) nas referências internas. Exemplos: "ver [P3.1 — Big Picture](#p31--big-picture--epics--roadmap)" ou "ver [Assistente](#s1--assistente-de-contexto-permanente)". Nunca use números de linha ou posição — eles se tornam inválidos quando o documento cresce.
-
-**Marcadores de migração:** seções marcadas com `→ v3` indicam conteúdo a ser puxado do documento anterior (`Kognit_reThink_Gi_v3.md`). O item de origem está indicado entre parênteses.
 
 ---
 
@@ -147,7 +145,7 @@ O **PE** revisa e aprova o `design.md`, monitora a execução dos Coding Agents,
 
 **Nota de acumulação:** em projetos pequenos ou demandas técnicas pontuais, o mesmo profissional pode acumular ambos os papéis — tipicamente o Analista de Solução conduzindo da concepção ao PR sem handoff.
 
-`→ v3: migrar detalhes completos de 1.1 (Redefinição de Papéis)`
+
 
 ---
 
@@ -194,7 +192,7 @@ flowchart LR
     RA --> OUT
 ```
 
-`→ v3: migrar detalhes de 1.4.A (Discovery de Produto)`
+
 
 ---
 
@@ -235,7 +233,7 @@ flowchart LR
 
 **Convergência — Business Need validado:** o `business-need.md` commitado e validado pelo PS é o artefato de entrada para P3. Nenhum dispatch para o BA Agent ocorre sem ele.
 
-`→ v3: migrar detalhes de 1.4.B (Consolidação e Triagem), 1.4.M (Entrada da Demanda de Mudança) e 1.12 (Assistente — modo Classificação)`
+
 
 ---
 
@@ -290,7 +288,7 @@ flowchart LR
     BN --> RA2 --> AA --> RV --> OUT
 ```
 
-`→ v3: migrar detalhes relevantes de 1.5 (BA Agent — Geração de Feature Spec), adaptando para a 1ª passagem`
+
 
 ---
 
@@ -362,7 +360,7 @@ flowchart LR
     FR --> PS2 --> OUT
 ```
 
-`→ v3: migrar detalhes de 1.5 (Geração de Feature Spec), 1.5.M (Delta Spec), 1.6 (Prototipação), 1.6.M (Delta Protótipo)`
+
 
 ---
 
@@ -380,7 +378,7 @@ flowchart LR
 
 > **Coerência com a Regra de Ouro ([S1](#assistente)):** Issues criadas manualmente (sem Assistente) devem ser notificadas ao Assistente para manter o `feature-map.yaml` atualizado. PS e PE podem criar e commitar artefatos manualmente — o repositório é a fonte de verdade, não a ferramenta.
 
-`→ v3: migrar detalhes de 1.7 (Gate de Validação) e 1.7.M (Gate de Aprovação de Mudança)`
+
 
 ---
 
@@ -401,7 +399,33 @@ flowchart LR
 - Spec Writer Agent [Sonnet] — gera `openapi-draft.yaml` quando a feature expõe nova API
 - Decompositor Agent [Sonnet] — decompõe `design.md` em Agentic Tasks e gera `acceptance-contract-[issue].md` por task
 
-**Seção obrigatória no `design.md` — Impacto no Banco de Dados:**
+**Seção obrigatória no `design.md` — Requisitos Não-Funcionais:**
+
+Para ambientes críticos (transações financeiras, dados sensíveis, alta disponibilidade), o Architecture Agent deve preencher obrigatoriamente:
+
+```markdown
+## Requisitos Não-Funcionais
+
+### Segurança
+- [ ] OWASP Top 10 verificado para os endpoints desta feature
+- [ ] Gestão de segredos — nenhuma credencial em código ou em contexto de agente
+- [ ] Autenticação/autorização — escopo mínimo necessário (least privilege)
+- [ ] Dados sensíveis identificados e tratados (criptografia, mascaramento)
+
+### Performance
+- Latência alvo: [X]ms p95 sob carga esperada
+- Volume esperado: [N] transações/hora no pico
+
+### Disponibilidade
+- SLA alvo: [X]%
+- Impacto de indisponibilidade: crítico / alto / médio / baixo
+
+### Integridade de dados
+- Boundaries transacionais: [quais operações são atômicas]
+- Rollback possível: sim / não — [estratégia]
+```
+
+> Critérios de RNF marcados como `verificabilidade: não funcional` no Acceptance Contract são verificados pelo CI/CD via SAST (análise estática — SonarQube ou equivalente) e load tests quando aplicável. O Code Reviewer Agent verifica aderência antes de gerar o MRP.
 
 Toda feature que toca o modelo de dados deve ter esta seção preenchida pelo Architecture Agent antes do Gate C. Ela é o input direto para o Backend Coder gerar as migrations:
 
@@ -467,7 +491,7 @@ Responsável:     Coding Agent | Code Reviewer | Product Engineer
 
 **Priorização das Issues:** segue os critérios definidos em [S2 — Gestão de Backlog e Priorização](#backlog).
 
-`→ v3: migrar detalhes de 1.8 (Architecture Agent), 1.9 (Spec Writer + Decompositor), adaptando estrutura do Acceptance Contract para incluir campo verificabilidade`
+
 
 ---
 
@@ -572,7 +596,7 @@ flowchart LR
     FC -.-> CRP
 ```
 
-`→ v3: migrar detalhes de 1.10 (Coding Agents — Backend e Frontend), adicionando descrição explícita do loop interno de teste`
+
 
 ---
 
@@ -625,7 +649,7 @@ flowchart LR
 
 > **Princípio da camada mínima necessária:** cada critério do Acceptance Contract deve ser verificado na camada mais rápida possível. Validações de campo, regras de negócio e comportamento de API ficam em `automática-api` (WebApplicationFactory — sem browser). Comportamento de componente React fica em `automática-componente` (RTL — sem browser). Apenas o que genuinamente requer browser vai para `e2e-smoke` — a jornada crítica de login e ação central do módulo. Ver documento *Qualidade e Testes no Processo Agent-First* para fundamentação completa.
 
-`→ v3: migrar detalhes de 1.11 (Pipeline de Qualidade), ajustando descrição do Test Agent para execução CI/CD e removendo geração separada de specs`
+
 
 ---
 
@@ -684,11 +708,11 @@ Quando o PR contém migration marcada com `[Destructive]`, o pipeline bloqueia o
 - Artefatos promovidos de `work/[issue]-[slug]/` para `docs/`
 - Business Need(s) da entrega arquivados/fechados
 
-`→ v3: migrar detalhes de 1.11 (Release Agent e Release Notes)`
+
 
 **Loop:** após a entrega, o processo pode retornar para P2 (projeto em andamento) com novos itens do triage ou para P1 (novo ciclo de discovery) conforme critérios de revisão de milestone.
 
-`→ v3: migrar critérios de revisão de milestone de 1.7`
+
 
 ---
 
@@ -716,7 +740,8 @@ Quando o PR contém migration marcada com `[Destructive]`, o pipeline bloqueia o
 | Demanda sem impacto funcional (bug, cosmético) | Classe A | Issue tipo Bug direto — sem Business Need |
 
 **Implementação no Now:**
-`→ v3: migrar opções de implementação de 1.16 (Teams Bot — Power Automate → Azure Bot Service)`
+
+O Assistente (S1) é acessível via interface web (assistant-ui) no MVP. A integração com Teams via Azure Bot Service é Fase 2 — quando o time adotar o canal como padrão de comunicação. O orquestrador LangGraph recebe as mensagens via API REST, independente do canal de entrada.
 
 ---
 
@@ -737,7 +762,7 @@ O Assistente aplica os seguintes critérios quando sugere prioridade de Issues:
 2. **Risco e complexidade** — issues de alto risco têm prioridade para detectar problemas cedo
 3. **Valor para o negócio (MoSCoW)** — Must have / Should have / Could have / Won't have
 
-`→ v3: migrar detalhes de 1.17 (Gestão Contínua de Backlog), adaptando para a nova hierarquia com Epic level`
+
 
 ---
 
@@ -887,7 +912,7 @@ Em vez de mapear ferramentas específicas, o processo define **capacidades neces
    (Consolidation + Legacy + Research para sessões)
 ```
 
-`→ Decisão pendente: escolha do orquestrador concreto (Claude Code, Codex, LangGraph, pipeline customizado ou outro). A decisão não afeta nenhuma seção deste documento.`
+> **Orquestrador:** LangGraph (Python, MIT) — escolha confirmada para o MVP. Agnóstico de modelo via LangChain integrations. Checkpointing com PostgreSQL. Observabilidade via LangSmith (MVP) / Langfuse self-hosted (Fase 2). Ver documento *Orquestrador_Analise_reThink.md* para fundamentação.
 
 ---
 
@@ -922,7 +947,7 @@ System prompts que definem papel, comportamento, políticas e formato de output 
 **Governança de skills:**
 Atualizações seguem PR com revisão do PE no repositório central. Mudanças propagam para projetos novos — não retroativamente. Cada repositório de projeto registra a versão dos skills em uso em `.kognit/agents/agents.md`.
 
-`→ v3: migrar políticas de CRP por skill e guardrails específicos de 1.2 (Camada 1)`
+**Políticas de CRP e guardrails por skill:** definidos no `CLAUDE.md` de cada projeto (Camada 3). O skill file define o comportamento padrão do agente; o `CLAUDE.md` define os limites operacionais específicos do projeto — limite de iterações, condições de escalada via CRP, modelos permitidos por nó e políticas de custo.
 
 ---
 
@@ -942,7 +967,7 @@ Esqueletos dos documentos gerados pelos agentes. Garantem que o output siga o fo
 | `crp.md` | Qualquer agente (política CRP) | PS ou PE | Qualquer fase |
 | `mrp.md` | Code Reviewer Agent | PE (Gate D) | P6 |
 
-`→ v3: migrar conteúdo interno dos templates, ajustando business-need.md (substitui backlog-item.md e change-request.md do v3) e adicionando roadmap-draft.md`
+**Implementação dos templates:** os templates da Camada 2 são implementados via **Spec Kit** (GitHub, licença MIT, custo zero), customizado com os padrões Kognit pela Head de Processos. O Spec Kit provê os slash commands `/specify → spec-[feature]`, `/plan → design.md` e `/tasks → acceptance-contracts`, integrados nativamente ao Claude Code e ao GitHub Projects. A customização dos templates é responsabilidade da Head — o conteúdo de cada template reflete o processo Kognit, não o template genérico do Spec Kit.
 
 ---
 
@@ -952,7 +977,7 @@ Arquivos que vivem no repositório do cliente e definem regras específicas daqu
 
 | Arquivo | Propósito | Quem mantém |
 |---|---|---|
-| `CLAUDE.md` | MentorScript — padrões de arquitetura, stack, regras de negócio, guardrails por agente, políticas operacionais, referência à versão dos skills em uso; inclui obrigatoriamente: regras de migration (convenção de nomenclatura, critérios para `[Destructive]`, seed data idempotente), limite de iterações do loop interno, regra de RTL (escrever apenas para critérios `automática-componente` — comportamentos interativos; nunca para componentes puramente presentacionais) | PE |
+| `CLAUDE.md` | MentorScript — padrões de arquitetura, stack, regras de negócio, guardrails por agente, políticas operacionais, referência à versão dos skills em uso; inclui obrigatoriamente: regras de migration (convenção de nomenclatura, critérios para `[Destructive]`, seed data idempotente), limite de iterações do loop interno, regra de RTL (escrever apenas para critérios `automática-componente`), **política de modelos por nó** (preferred + fallback — garante agnósticidade e continuidade se um provider ficar indisponível) | PE |
 | `.cursorrules` | Padrões front-end para os Coder Agents: convenções React/TypeScript, estrutura de componentes, padrões de estado | PE |
 | `.coderabbit.yaml` | Regras de review automático: critérios de qualidade, checklist de segurança, padrões de PR | PE |
 | `.kognit/agents/agents.md` | Registro da versão dos skills em uso no projeto | PE |
@@ -979,7 +1004,25 @@ Todo trabalho do projeto vive em um único GitHub Project com as seguintes confi
 | Sprint | Iteração | Sprint 1 · Sprint 2 · ... |
 
 **Labels de processo:**
-`→ v3: migrar lista completa de labels de 1.2 (Governança — GitHub Projects)`
+
+| Label | Cor | Uso |
+|---|---|---|
+| `tipo:epic` | Roxo | Issues do tipo Epic |
+| `tipo:feature` | Verde escuro | Issues do tipo Feature |
+| `tipo:bug` | Vermelho | Bugs — entrada direta |
+| `tipo:task` | Azul | Tasks — entrada direta |
+| `tipo:spike` | Amarelo | Spikes de pesquisa/estudo |
+| `tipo:risco` | Laranja | Rastreamento de riscos |
+| `tipo:pendencia` | Cinza | Bloqueios externos |
+| `fase:mvp` | Verde | Escopo do MVP atual |
+| `fase:next` | Azul claro | Próxima onda |
+| `fase:awesome` | Lilás | Horizonte futuro |
+| `agente:em-execucao` | Amarelo | Issue sendo processada por agente |
+| `agente:crp` | Vermelho claro | Agente aguarda resposta humana |
+| `gate:aguardando` | Laranja | Aguardando aprovação de gate |
+| `gate:aprovado` | Verde | Gate aprovado |
+| `seguranca:revisao` | Vermelho | Requer revisão de segurança antes do merge |
+| `destrutivo` | Vermelho escuro | Migration ou operação destrutiva — Gate D extra |
 
 **Views recomendadas:**
 - **Roadmap** — agrupado por Fase, ordenado por Prioridade, Tipo = Epic
@@ -990,13 +1033,38 @@ Todo trabalho do projeto vive em um único GitHub Project com as seguintes confi
 
 ### Interface de Dispatch
 
-`→ v3: migrar tabela de implementação recomendada de 1.16 (Power Automate → Azure Bot Service)`
+O Assistente de Contexto Permanente (S1) é acessível via interface web durante o MVP. A integração com canais de comunicação corporativos (Teams, Slack) é Fase 2.
+
+| Modo | Implementação MVP | Fase 2 |
+|---|---|---|
+| Interface de conversa | assistant-ui (React · web) | Teams Bot via Azure Bot Service |
+| Gates humanos | Streamlit (interface visual de aprovação) | Notificação no canal do time |
+| Monitoramento | LangGraph Studio (dev) / LangSmith (produção) | Dashboard integrado |
+
+**Agnósticidade:** a interface é desacoplada do orquestrador via REST API e WebSocket. Trocar de assistant-ui para Teams Bot não altera o grafo LangGraph nem os skill files.
 
 ---
 
-### Ambientes de Execução
+### Ambientes de Execução e Segurança
 
-`→ v3: migrar de 1.13 (Ambientes de Execução em Cloud)`
+O processo define **quatro ambientes** com segregação estrita. Nenhum agente tem acesso direto a `hom_prod` ou `producao` — toda ação nesses ambientes passa por Gate humano explícito.
+
+| Ambiente | Propósito | Acesso dos Agentes | Gate para escalar |
+|---|---|---|---|
+| `dev_qa` | Desenvolvimento e testes automatizados | ✅ Leitura e escrita — loop interno do Coding Agent | — |
+| `hom_prod` | Validação de negócio (UAT) | ⚠️ Apenas via pipeline CI/CD após Gate D | Gate D — PE aprova merge |
+| `producao` | Ambiente real dos usuários | ❌ Nenhum acesso direto de agente | Gate D + aprovação de deploy |
+
+**Princípios de segurança por agente:**
+
+- **Least privilege:** cada agente recebe apenas as permissões mínimas para sua tarefa. Coding Agent acessa apenas sua branch. Release Agent acessa o pipeline mas não o banco de produção diretamente.
+- **Sandbox obrigatório:** o loop interno do Coding Agent (implementação + testes) roda exclusivamente em `dev_qa`. Nenhuma execução de código, migration ou seed acontece em `hom_prod` ou `producao` sem Gate D explícito.
+- **Secrets segmentados:** o `CLAUDE.md` e os skill files não carregam credenciais. O agente recebe referências de ambiente (ex: `$DB_DEV_CONN`) resolvidas pelo runtime com as permissões do ambiente correto. Credenciais de produção nunca estão em contexto de inferência.
+- **Bloqueio de comandos destrutivos:** qualquer operação que afete dados persistidos fora de `dev_qa` (incluindo migrations `[Destructive]`, truncates, resets) requer `interrupt()` no grafo LangGraph — o pipeline pausa e aguarda aprovação do PE antes de continuar.
+- **Audit trail completo:** LangSmith/Langfuse registra cada ação do agente com timestamp, modelo utilizado, inputs e outputs. Para ambientes com transações financeiras, isso constitui rastreabilidade completa de quem (qual agente e modelo) executou o quê e quando.
+- **SAST/DAST no CI/CD:** análise estática de segurança (SonarQube ou equivalente) faz parte do pipeline de P6 como critério `não funcional` dos Acceptance Contracts. O Code Reviewer Agent verifica se os critérios de segurança foram atendidos antes de gerar o MRP.
+
+**AWS como runtime:** os servidores AWS são infraestrutura de execução — não são dependência de fornecedor de IA. Os agentes rodam sobre LangGraph (self-hosted ou Bedrock AgentCore) e são agnósticos ao cloud provider.
 
 ---
 
@@ -1037,7 +1105,41 @@ Todo trabalho do projeto vive em um único GitHub Project com as seguintes confi
 
 ### A2 — Estrutura de Arquivos {#filesystem}
 
-`→ v3: migrar estrutura de pastas de 1.2 (Governança — File System), adicionando nível de Epic, business-need.md e roadmap-draft.md`
+**Estrutura de pastas do repositório de projeto:**
+
+```
+[projeto]/
+├── .kognit/
+│   ├── agents/
+│   │   └── agents.md          # versão dos skills em uso neste projeto
+│   └── templates/             # cópia dos templates Spec Kit customizados Kognit
+├── work/
+│   └── [issue]-[slug]/        # artefatos em construção — gerados pelos agentes
+│       ├── business-need.md
+│       ├── spec-[feature]-v1.md
+│       ├── design.md
+│       ├── acceptance-contract-[issue].md
+│       ├── mrp.md
+│       ├── crp.md (quando emitido)
+│       └── ux-review/         # screenshots do UX Reviewer Agent
+├── docs/
+│   └── [issue]-[slug]/        # artefatos promovidos após merge pelo Release Agent
+├── specs/
+│   └── [###-feature]/         # estrutura Spec Kit — gerada pelos slash commands
+│       ├── spec.md
+│       ├── plan.md
+│       ├── data-model.md
+│       └── tasks.md
+├── src/                       # código-fonte do produto
+├── Migrations/                # EF Core ou FluentMigrator
+├── CLAUDE.md                  # MentorScript — regras do projeto para os agentes
+├── .coderabbit.yaml           # regras de code review automático
+├── .cursorrules               # padrões front-end para Coding Agents
+├── constitution.md            # Spec Kit — princípios não-negociáveis do projeto
+└── feature-map.yaml           # índice de Epics e Features — atualizado pelo Release Agent
+```
+
+**Regra de promoção:** artefatos ficam em `work/` durante o desenvolvimento e são promovidos para `docs/` pelo Release Agent após o merge aprovado em Gate D. Nada é deletado — o histórico completo de decisões permanece rastreável.
 
 ### A3 — Progressão de US+AC {#usac}
 
@@ -1108,10 +1210,15 @@ Identificada (aguardando cliente, terceiro ou decisão interna)
 | Risco | ⚠️ Pode gerar | ✅ Se mitigado ou aceito | Não — mas decisão deve ser registrada |
 | Pendência | ❌ Raramente | ✅ Quando resolvida externamente | Não |
 
-`→ v3: migrar tabela de Classe A/B/C/D de 1.12 (Assistente — Política de Roteamento), ajustando:
-- Classe B: referência a business-need.md em vez de change-request.md
-- Classe C: atualizar para fluxo de 2 passagens + 2 gates`
+**Política de Roteamento do Assistente — Classes de Demanda:**
+
+| Classe | Tipo de demanda | Caminho | Exemplo |
+|---|---|---|---|
+| **A** | Bug ou problema operacional sem impacto funcional novo | Issue tipo Bug criada diretamente — sem Business Need | Erro de formatação, comportamento inesperado documentado |
+| **B** | Mudança em feature existente em produção | `business-need.md` → P3.2 direto (sem P3.1) | Novo campo em formulário existente, ajuste de regra de negócio |
+| **C** | Feature nova ou módulo novo | `business-need.md` → P3.1 (Epics) → Gate A → P3.2 (Spec) → Gate B | Novo módulo de relatórios, nova integração |
+| **D** | Task sensível com impacto em infraestrutura, segurança ou dados de produção | `business-need.md` → Gate explícito do PE antes de qualquer execução | Mudança de schema em produção, alteração de política de acesso |
+
+O Assistente classifica automaticamente a demanda ao criar a Issue, consultando o `feature-map.yaml` para identificar se a Feature existe, está em andamento ou é nova. Em caso de ambiguidade, emite CRP ao PS antes de criar qualquer Issue.
 
 ---
-
-*Esqueleto gerado em Abril de 2026 para validação da estrutura antes da migração de conteúdo do reThink v3. Seções marcadas com `→ v3` aguardam migração.*
