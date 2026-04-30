@@ -1105,89 +1105,147 @@ O processo define **quatro ambientes** com segregação estrita. Nenhum agente t
 
 ### A2 — Estrutura de Arquivos {#filesystem}
 
-**Estrutura de pastas do repositório de projeto:**
+O processo opera sobre **dois tipos de repositório** por cliente. Para clientes com produto único, o `[cliente]-context` pode ser omitido — o contexto vive dentro do próprio repositório de produto em pastas equivalentes.
+
+---
+
+#### Repositório `[cliente]-context` — contexto compartilhado entre produtos
+
+Todos os artefatos deste repositório são **gerados e mantidos por agentes** — não por humanos. O PS não escreve nada aqui diretamente: conduz as sessões, valida os outputs, e os agentes commitem.
 
 ```
-[projeto]/
+[cliente]-context/
+│
+├── context/
+│   ├── discovery-draft-[produto].md   # Consolidation Agent acumula entre sessões
+│   ├── discovery-[produto]-[data].md  # aprovado pelo PS — input do BA Agent
+│   ├── session-[cliente]-[data].md    # Consolidation Agent estrutura cada sessão
+│   ├── personas-[produto].md          # Analyst Agent gera em P3.2
+│   └── journeys-[produto].md          # Analyst Agent gera em P3.2
+│
+├── triage/
+│   ├── triage-[cliente].md            # Consolidation Agent mantém — itens pendentes
+│   └── triage-history-[cliente].md    # log cronológico — Issue, produto, data, decisão
+│
+└── identidade-visual/                 # único artefato com input manual do PS — uma vez por cliente
+    ├── logo-[cliente].png
+    ├── paleta-[cliente].png
+    └── design-system-[cliente].md
+```
+
+> **Multi-produto no mesmo cliente:** o `triage-[cliente].md` e as sessões cobrem todos os produtos — cada item identifica o produto ao qual pertence. O `discovery-draft` e `personas` são por produto. O mesmo `[cliente]-context` serve os dois produtos sem duplicação.
+
+---
+
+#### Repositório `[produto]` — estrutura técnica
+
+Um repositório por produto. O `feature-map.yaml` é a fonte de verdade do produto — mantido pelo Release Agent — e inclui referências de integração com outros produtos quando existirem.
+
+```
+[produto]/
 │
 ├── .kognit/
 │   ├── agents/
-│   │   └── agents.md              # registro de versão dos skills em uso
-│   │                              # formato: skill | versão | data adoção | responsável
+│   │   └── agents.md              # skill | versão | data adoção | responsável
 │   └── templates/                 # templates Spec Kit customizados Kognit
-│       ├── spec-template.md       # base para /speckit.specify → Feature Spec
-│       ├── plan-template.md       # base para /speckit.plan → design.md
-│       └── tasks-template.md      # base para /speckit.tasks → Acceptance Contracts
+│       ├── spec-template.md
+│       ├── plan-template.md
+│       └── tasks-template.md
 │
 ├── work/                          # artefatos EM CONSTRUÇÃO — gerados pelos agentes
-│   └── [issue]-[slug]/            # uma pasta por Issue
+│   └── [issue]-[slug]/
 │       ├── business-need.md       # P2 — Assistente gera, PS valida
-│       ├── roadmap-draft.md       # P3.1 — Analyst Agent, bullets de Epics
-│       ├── spec-[feature]-v1.md   # P3.2 — Feature nova (spec completa)
+│       ├── roadmap-draft.md       # P3.1 — Analyst Agent
+│       ├── spec-[feature]-v1.md   # P3.2 — Feature nova
 │       ├── spec-delta-[issue].md  # P3.2 — Mudança em feature existente
-│       ├── design.md              # P4 — Architecture Agent
-│       │                          #   inclui: arquitetura, banco, RNFs, impacto
-│       ├── openapi-draft.yaml     # P4 — Spec Writer (condicional — nova API)
+│       ├── design.md              # P4 — Architecture Agent (banco + RNFs obrigatórios)
+│       ├── openapi-draft.yaml     # P4 — Spec Writer (condicional)
 │       ├── acceptance-contract-[issue].md  # P4 — Decompositor Agent
-│       │                          #   inclui: critérios com campo verificabilidade
 │       ├── mrp.md                 # P6 — Code Reviewer Agent
 │       ├── crp.md                 # qualquer fase — quando agente emite CRP
-│       └── ux-review/             # P3.2 — UX Reviewer Agent
-│           └── [screenshot].png   # capturas do protótipo renderizado
+│       └── ux-review/
+│           └── [screenshot].png   # P3.2 — UX Reviewer Agent
 │
-├── docs/                          # artefatos PROMOVIDOS — após merge aprovado (Gate D)
-│   └── [epic-slug]/               # organizado por Epic
-│       └── [feature-slug]/        # organizado por Feature
-│           ├── spec-[feature]-v[N].md     # versão atual da spec (Release Agent atualiza)
-│           ├── openapi.yaml               # API publicada (promovida do draft)
+├── docs/                          # artefatos PROMOVIDOS após Gate D — Release Agent
+│   └── [epic-slug]/
+│       └── [feature-slug]/
+│           ├── spec-[feature]-v[N].md
+│           ├── openapi.yaml
 │           └── acceptance-contracts/
-│               └── [issue]-ac.md          # contratos por Issue entregue
+│               └── [issue]-ac.md
 │
-├── specs/                         # estrutura Spec Kit — gerada pelos slash commands
-│   └── [###-feature]/             # numeração automática pelo Spec Kit
-│       ├── spec.md                # /speckit.specify — objetivos funcionais + US
-│       ├── plan.md                # /speckit.plan — design técnico
-│       ├── data-model.md          # /speckit.plan — modelo de dados
-│       └── tasks.md               # /speckit.tasks — Acceptance Contracts
+├── specs/                         # Spec Kit — gerado pelos slash commands
+│   └── [###-feature]/
+│       ├── spec.md
+│       ├── plan.md
+│       ├── data-model.md
+│       └── tasks.md
 │
-├── src/                           # código-fonte do produto
+├── processes/                         # processos de negócio do produto — agent-maintained
+│   ├── [processo]-as-is-v[n].bpmn     # Legacy Agent — navega sistema legado
+│   ├── [processo]-as-is-v[n].png      # gerado pelo CI a partir do BPMN
+│   ├── [processo]-to-be-v[n].bpmn     # Analyst Agent — gerado em P3.2
+│   └── [processo]-to-be-v[n].png      # gerado pelo CI a partir do BPMN
+│
+├── src/
 │   ├── backend/                   # .NET Core — C#
 │   └── frontend/                  # React — TypeScript
 │
 ├── Migrations/                    # EF Core ou FluentMigrator
-│   └── [timestamp]_[description].cs   # migrations versionadas; [Destructive] quando aplicável
+│   └── [timestamp]_[description].cs
 │
-├── CHANGELOG.md                   # atualizado pelo Release Agent a cada entrega
-├── CLAUDE.md                      # MentorScript — regras do projeto para os agentes
-│                                  #   inclui: stack, convenções, política de modelos,
-│                                  #   limites de iteração, regra RTL, critérios [Destructive]
-├── constitution.md                # Spec Kit — princípios não-negociáveis (base do CLAUDE.md)
-├── .coderabbit.yaml               # regras de code review automático — configurado pelo PE
-├── .cursorrules                   # padrões front-end para Coding Agents
-└── feature-map.yaml               # índice de Epics e Features — fonte de verdade do produto
-                                   # atualizado pelo Release Agent após cada entrega
+├── CHANGELOG.md                   # Release Agent atualiza a cada entrega
+├── CLAUDE.md                      # MentorScript — regras e política de modelos
+├── constitution.md                # Spec Kit — princípios não-negociáveis
+├── .coderabbit.yaml
+├── .cursorrules
+└── feature-map.yaml               # fonte de verdade do produto — Release Agent mantém
 ```
 
-**Regras de ciclo de vida dos artefatos:**
+**Schema do `feature-map.yaml` — seção de integrações:**
 
-| Fase | Artefato | Criado por | Local | Destino após merge |
-|---|---|---|---|---|
-| P2 | `business-need.md` | Assistente (PS valida) | `work/` | Arquivado — referência histórica |
-| P3.1 | `roadmap-draft.md` | Analyst Agent | `work/` | Arquivado |
-| P3.2 | `spec-[feature]-v1.md` | Analyst Agent | `work/` e `specs/` | `docs/[epic]/[feature]/` |
-| P3.2 | `spec-delta-[issue].md` | Analyst Agent | `work/` | Incorporado à spec pelo Release Agent |
-| P3.2 | screenshots UX | UX Reviewer Agent | `work/ux-review/` | Arquivado |
-| P4 | `design.md` | Architecture Agent | `work/` | Arquivado após merge |
-| P4 | `openapi-draft.yaml` | Spec Writer Agent | `work/` | `docs/[epic]/[feature]/openapi.yaml` |
-| P4 | `acceptance-contract-[issue].md` | Decompositor Agent | `work/` | `docs/[epic]/[feature]/acceptance-contracts/` |
-| P6 | `mrp.md` | Code Reviewer Agent | `work/` | Arquivado — auditoria |
-| P6 | `crp.md` | Qualquer agente | `work/` | Arquivado — auditoria |
-| P7 | `CHANGELOG.md` | Release Agent | raiz | Permanente — atualizado incrementalmente |
-| P7 | `feature-map.yaml` | Release Agent | raiz | Permanente — fonte de verdade |
+Quando dois produtos do mesmo cliente se integram, cada um registra o ponto de integração no seu próprio `feature-map.yaml`. O Assistente lê ambos na análise de impacto e detecta conflitos automaticamente — sem mapeamento manual extra.
 
-> **Nada é deletado.** O histórico completo de decisões, CRPs e MRPs permanece rastreável no repositório. A promoção de `work/` para `docs/` não remove os originais — apenas torna os artefatos finais acessíveis em estrutura navegável por Epic e Feature.
+```yaml
+# feature-map.yaml do produto-a
+integrations:
+  - product: produto-b
+    type: api-consumer           # produto-a consome API do produto-b
+    features:
+      - local: FERA-F012
+        depends_on: FERB-F003
+        contract: openapi.yaml
 
-> **Spec Kit e `work/`:** o Spec Kit gera artefatos em `specs/[###-feature]/`. O Release Agent é responsável por mover o conteúdo final para `docs/` na estrutura por Epic/Feature. Os dois sistemas coexistem — `specs/` é o espaço de geração dos agentes via slash commands; `docs/` é o espaço de consulta de qualquer membro do time.
+# feature-map.yaml do produto-b (espelho)
+integrations:
+  - product: produto-a
+    type: api-provider
+    features:
+      - local: FERB-F003
+        consumed_by: FERA-F012
+```
+
+---
+
+**Regras de ciclo de vida:**
+
+| Artefato | Criado/mantido por | Onde vive | Após merge |
+|---|---|---|---|
+| `session-[cliente]-[data].md` | Consolidation Agent | `[cliente]-context/context/` | Permanente |
+| `triage-[cliente].md` | Consolidation Agent | `[cliente]-context/triage/` | Permanente — atualizado a cada sessão |
+| `[processo]-as-is.bpmn` | Legacy Agent | `[cliente]-context/processes/` | Permanente |
+| `[processo]-to-be.bpmn` | Analyst Agent (P3.2) | `[cliente]-context/processes/` | Permanente — versionado |
+| `business-need.md` | Assistente | `work/` | Arquivado |
+| `spec-[feature]-v1.md` | Analyst Agent | `work/` e `specs/` | `docs/[epic]/[feature]/` |
+| `design.md` | Architecture Agent | `work/` | Arquivado |
+| `acceptance-contract-[issue].md` | Decompositor Agent | `work/` | `docs/[epic]/[feature]/acceptance-contracts/` |
+| `mrp.md` / `crp.md` | Agents | `work/` | Arquivado — auditoria |
+| `feature-map.yaml` | Release Agent | raiz do produto | Permanente |
+| `CHANGELOG.md` | Release Agent | raiz do produto | Permanente |
+
+> **Nada é deletado.** O histórico completo de decisões permanece rastreável no repositório.
+
+> **Produto único:** o `[cliente]-context` pode ser omitido — `context/`, `triage/` e `processes/` ficam na raiz do repositório de produto. A decisão de separar pode ser tomada quando surgir o segundo produto.
 
 ### A3 — Progressão de US+AC {#usac}
 
